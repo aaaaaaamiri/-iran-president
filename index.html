@@ -1,0 +1,590 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IRAN PRESIDENT 5.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#15121e;--panel:#211c30;--panel2:#29233a;--panel3:#322a46;--gold:#e6c66f;--purple:#9472df;--green:#4dc99a;--red:#ed6c7a;--blue:#67a9ee;--text:#f3efff;--muted:#aaa2bd;--border:#403650}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,sans-serif}
+button,input,select{font-family:inherit}
+button{cursor:pointer;border:0}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#1d1829;border-left:1px solid var(--border);padding:22px 15px;position:fixed;right:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.brand{padding:8px 10px 25px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.brand h2{margin:0;color:var(--gold);font-size:21px}
+.brand small{color:var(--muted)}
+.nav-title{font-size:11px;color:#837a99;padding:12px 12px 7px}
+.nav button{width:100%;text-align:right;background:transparent;color:#c3bbd2;padding:11px;border-radius:11px;margin:3px 0;font-size:13px;transition:.2s}
+.nav button:hover,.nav button.active{background:#39304e;color:var(--gold)}
+.nav button span{margin-left:10px}
+.sidebar-footer{position:absolute;bottom:18px;right:15px;left:15px;color:#827991;font-size:11px;text-align:center}
+.main{margin-right:245px;width:calc(100% - 245px);padding:22px 25px 50px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:25px;flex-wrap:wrap}
+.page-title h1{font-size:23px;margin:0 0 4px}
+.page-title p{font-size:12px;color:var(--muted);margin:0}
+.top-actions{display:flex;align-items:center;gap:9px}
+.datebox{background:var(--panel);border:1px solid var(--border);padding:9px 13px;border-radius:10px;font-size:12px}
+.btn{padding:10px 15px;border-radius:10px;background:var(--purple);color:white;font-weight:700;font-size:12px}
+.btn:hover{filter:brightness(1.13)}
+.btn.gold{background:var(--gold);color:#211a29}.btn.green{background:#277d62}.btn.red{background:#9f4052}.btn.blue{background:#376da4}.btn.gray{background:#514761}
+.menu-toggle{display:none;background:var(--panel2);color:white;padding:10px;border-radius:9px}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:17px;min-width:0}
+.stat{position:relative;overflow:hidden}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:24px;font-weight:900;margin:9px 0 3px}
+.stat-foot{font-size:11px;color:var(--green)}
+.gold-text{color:var(--gold)}.green-text{color:var(--green)}.red-text{color:var(--red)}.blue-text{color:var(--blue)}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:20px 0 12px;gap:10px}
+.section-head h3{font-size:15px;margin:0}
+.section-head small{color:var(--muted);font-size:11px}
+.two-col{grid-template-columns:1.35fr 1fr}.three-col{grid-template-columns:repeat(3,minmax(0,1fr))}
+.chart-wrap{height:235px;position:relative}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.muted{color:var(--muted)}.small{font-size:11px}
+.tag{font-size:10px;padding:4px 8px;border-radius:20px;background:#39304c;color:var(--gold)}
+.progress{height:8px;background:#393148;border-radius:20px;overflow:hidden;margin-top:9px}
+.progress i{display:block;height:100%;border-radius:20px;background:var(--purple)}
+.progress.green i{background:var(--green)}.progress.gold i{background:var(--gold)}.progress.red i{background:var(--red)}
+.list{display:flex;flex-direction:column;gap:10px}
+.list-item{padding:12px;background:#292338;border-radius:11px;border:1px solid #3a3149}
+.list-item h4{margin:0 0 5px;font-size:13px}.list-item p{margin:0 0 8px;color:var(--muted);font-size:11px;line-height:1.8}
+.action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.action-grid button{font-size:11px;padding:10px 6px}
+#map{height:440px;border-radius:13px;z-index:1;background:#242035}
+.map-layout{display:grid;grid-template-columns:1fr 300px;gap:15px}
+.country-info{min-height:200px}
+.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.field label{font-size:11px;color:var(--muted)}
+.field input,.field select{background:#171421;color:white;border:1px solid var(--border);border-radius:9px;padding:10px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--purple)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{text-align:right;padding:11px 8px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:500}
+.news-item{border-right:3px solid var(--gold);padding:9px 12px;background:#292338;border-radius:7px;margin-bottom:9px;font-size:12px;line-height:1.8}
+.badge{display:inline-block;padding:4px 8px;border-radius:7px;font-size:10px;background:#3c314e;color:var(--gold)}
+.member{display:flex;align-items:center;gap:12px;padding:12px;background:#292338;border:1px solid #3a3149;border-radius:11px;margin-bottom:9px}
+.avatar{width:42px;height:42px;border-radius:12px;background:#493b65;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+.member-info{flex:1;min-width:0}.member-info b{font-size:12px}.member-info small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.party-bar{height:10px;border-radius:20px;background:#393148;overflow:hidden;margin:8px 0}
+.party-bar i{display:block;height:100%;border-radius:20px}
+.vote-box{padding:13px;background:#292338;border-radius:11px;margin:10px 0}
+.vote-result{font-size:11px;color:var(--muted);margin-top:7px}
+.overlay{display:none}.toast{position:fixed;bottom:20px;left:20px;background:#302842;border:1px solid var(--gold);padding:12px 18px;border-radius:11px;z-index:300;box-shadow:0 8px 30px #0008;font-size:12px;animation:pop .25s}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+hr{border:0;border-top:1px solid var(--border);margin:15px 0}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.map-layout{grid-template-columns:1fr}.three-col{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.sidebar{transform:translateX(105%);transition:.25s;width:260px;box-shadow:-10px 0 30px #0005}.sidebar.open{transform:translateX(0)}.overlay.show{display:block;position:fixed;inset:0;background:#0009;z-index:90}.main{margin:0;width:100%;padding:15px 12px 35px}.menu-toggle{display:block}.topbar{align-items:flex-start}.page-title h1{font-size:19px}.datebox{display:none}.stats{gap:9px}.card{padding:13px}.stat-value{font-size:20px}#map{height:360px}.three-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+ <div class="brand"><h2>👑 IRAN PRESIDENT</h2><small>نسخه 5.3 | GOVERNMENT UPDATE</small></div>
+ <div class="nav-title">مدیریت کشور</div>
+ <nav class="nav">
+  <button class="active" data-page="dashboard"><span>▦</span>داشبورد اصلی</button>
+  <button data-page="government"><span>🏛️</span>دولت و کابینه</button>
+  <button data-page="parliament"><span>📜</span>مجلس و قوانین</button>
+  <button data-page="public"><span>👥</span>مردم و اعتراضات</button>
+  <button data-page="election"><span>🗳️</span>انتخابات</button>
+  <button data-page="world"><span>🌍</span>نقشه جهان و دیپلماسی</button>
+  <button data-page="economy"><span>📈</span>اقتصاد و بودجه</button>
+  <button data-page="military"><span>⚔️</span>نیروهای مسلح</button>
+  <button data-page="projects"><span>🏗️</span>پروژه‌های ملی</button>
+  <button data-page="news"><span>📰</span>اخبار کشور</button>
+  <div class="nav-title">سیستم بازی</div>
+  <button data-page="save"><span>💾</span>ذخیره و مدیریت بازی</button>
+ </nav>
+ <div class="sidebar-footer">IRAN PRESIDENT © 2026<br>شبیه‌ساز مدیریت کشور</div>
+</aside>
+<main class="main">
+<header class="topbar">
+ <div class="row" style="justify-content:flex-start">
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <div class="page-title"><h1 id="pageTitle">داشبورد ریاست جمهوری</h1><p>مرکز فرماندهی جمهوری اسلامی ایران</p></div>
+ </div>
+ <div class="top-actions"><div class="datebox">📅 <span id="dateText"></span></div><button class="btn gold" onclick="nextMonth()">⏩ ماه بعد</button></div>
+</header>
+
+<section class="page active" id="dashboard">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">💰 بودجه ملی</div><div class="stat-value gold-text" id="budgetStat"></div><div class="stat-foot">میلیارد دلار</div></div>
+  <div class="card stat"><div class="stat-label">📊 تولید ناخالص داخلی</div><div class="stat-value" id="gdpStat"></div><div class="stat-foot">میلیارد دلار</div></div>
+  <div class="card stat"><div class="stat-label">❤️ رضایت مردم</div><div class="stat-value green-text" id="approvalStat"></div><div class="stat-foot">شاخص رضایت عمومی</div></div>
+  <div class="card stat"><div class="stat-label">🛡️ قدرت نظامی</div><div class="stat-value" id="militaryStat"></div><div class="stat-foot">امتیاز دفاعی</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>📈 وضعیت اقتصادی</h3><span class="badge">گزارش ملی</span></div><div class="chart-wrap"><canvas id="economyChart"></canvas></div></div>
+  <div class="card"><div class="section-head"><h3>📌 شاخص‌های کشور</h3></div><div id="indicators"></div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>📰 آخرین اخبار</h3><button class="btn gray" onclick="showPage('news')">همه اخبار</button></div><div id="dashboardNews"></div></div>
+  <div class="card">
+   <div class="section-head"><h3>🎯 تصمیم‌های سریع</h3></div>
+   <div class="action-grid">
+    <button class="btn green" onclick="quickDecision('subsidy')">افزایش یارانه‌ها</button>
+    <button class="btn blue" onclick="quickDecision('education')">سرمایه‌گذاری آموزشی</button>
+    <button class="btn gold" onclick="quickDecision('industry')">حمایت از صنعت</button>
+    <button class="btn red" onclick="quickDecision('security')">افزایش امنیت</button>
+   </div>
+   <hr><div class="row"><span class="muted small">ثبات سیاسی</span><b id="stabilityText"></b></div><div class="progress"><i id="stabilityBar"></i></div>
+   <div class="row" style="margin-top:15px"><span class="muted small">زمان باقی‌مانده تا انتخابات</span><b id="termText"></b></div>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="government">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">اعضای کابینه</div><div class="stat-value gold-text" id="cabinetCount">۵</div></div>
+  <div class="card stat"><div class="stat-label">میانگین عملکرد وزیران</div><div class="stat-value" id="cabinetAverage">۷۰٪</div></div>
+  <div class="card stat"><div class="stat-label">حمایت کابینه</div><div class="stat-value green-text" id="cabinetSupport">۷۰٪</div></div>
+  <div class="card stat"><div class="stat-label">مدت دولت</div><div class="stat-value" id="termStat">ماه ۱</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>🏛️ اعضای کابینه دولت</h3><span class="badge">دولت فعلی</span></div><div id="cabinetList"></div></div>
+  <div class="card">
+   <div class="section-head"><h3>➕ انتخاب وزیر جدید</h3></div>
+   <div class="field"><label>سمت وزارت</label><select id="ministerRole"><option value="economy">وزیر اقتصاد</option><option value="foreign">وزیر امور خارجه</option><option value="defense">وزیر دفاع</option><option value="interior">وزیر کشور</option><option value="education">وزیر آموزش</option></select></div>
+   <div class="field"><label>نام وزیر</label><input id="ministerName" placeholder="نام وزیر را وارد کن"></div>
+   <button class="btn gold" onclick="appointMinister()">انتصاب وزیر</button>
+   <hr>
+   <div class="list-item"><h4>📋 وظایف دولت</h4><p>عملکرد وزیران روی اقتصاد، روابط خارجی، امنیت، آموزش و رضایت مردم اثر می‌گذارد. وزیر ضعیف ممکن است باعث افت شاخص‌های کشور شود.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="parliament">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">تعداد کرسی‌ها</div><div class="stat-value">۲۹۰</div></div>
+  <div class="card stat"><div class="stat-label">حامیان دولت</div><div class="stat-value green-text" id="supportSeats">۱۶۰</div></div>
+  <div class="card stat"><div class="stat-label">مخالفان دولت</div><div class="stat-value red-text" id="oppositionSeats">۱۳۰</div></div>
+  <div class="card stat"><div class="stat-label">لوایح تصویب‌شده</div><div class="stat-value gold-text" id="passedBills">۰</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>🏛️ ترکیب مجلس</h3></div><div id="partyList"></div></div>
+  <div class="card">
+   <div class="section-head"><h3>📜 ارائه لایحه</h3></div>
+   <div class="field"><label>موضوع لایحه</label><select id="billType"><option value="economy">لایحه توسعه اقتصادی</option><option value="education">لایحه آموزش رایگان</option><option value="security">لایحه امنیت ملی</option><option value="welfare">لایحه حمایت اجتماعی</option><option value="tax">لایحه اصلاح مالیات</option></select></div>
+   <div class="field"><label>عنوان لایحه</label><input id="billName" placeholder="عنوان پیشنهادی"></div>
+   <button class="btn gold" onclick="submitBill()">ارسال لایحه به مجلس</button>
+   <hr><p class="muted small">هر لایحه با توجه به ترکیب مجلس و محبوبیت دولت رأی می‌آورد یا رد می‌شود.</p>
+  </div>
+ </div>
+ <div class="card" style="margin-top:15px"><div class="section-head"><h3>📋 سوابق رأی‌گیری</h3></div><div id="billHistory"></div></div>
+</section>
+
+<section class="page" id="public">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">رضایت عمومی</div><div class="stat-value green-text" id="publicApproval">۶۵٪</div></div>
+  <div class="card stat"><div class="stat-label">اعتماد عمومی</div><div class="stat-value" id="trustStat">۶۰٪</div></div>
+  <div class="card stat"><div class="stat-label">نارضایتی</div><div class="stat-value red-text" id="dissatisfaction">۳۵٪</div></div>
+  <div class="card stat"><div class="stat-label">سطح اعتراضات</div><div class="stat-value" id="protestLevel">کم</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>👥 وضعیت افکار عمومی</h3></div><div id="publicIndicators"></div></div>
+  <div class="card">
+   <div class="section-head"><h3>📢 سیاست‌های اجتماعی</h3></div>
+   <div class="list">
+    <div class="list-item"><h4>گفت‌وگوی مستقیم با مردم</h4><p>افزایش اعتماد و کاهش تنش اجتماعی.</p><button class="btn blue" onclick="publicAction('dialogue')">اجرای برنامه</button></div>
+    <div class="list-item"><h4>بسته حمایتی خانوار</h4><p>هزینه بودجه‌ای، افزایش رضایت عمومی.</p><button class="btn green" onclick="publicAction('welfare')">هزینه ۲۰ میلیارد</button></div>
+    <div class="list-item"><h4>اصلاح خدمات عمومی</h4><p>بهبود خدمات شهری و رفاهی.</p><button class="btn gold" onclick="publicAction('services')">هزینه ۱۵ میلیارد</button></div>
+    <div class="list-item"><h4>رسیدگی به مطالبات اجتماعی</h4><p>رسیدگی به خواسته‌های مردم از مسیر گفت‌وگو و قانون.</p><button class="btn" onclick="publicAction('reform')">اجرای اصلاحات</button></div>
+   </div>
+  </div>
+ </div>
+ <div class="card" style="margin-top:15px"><div class="section-head"><h3>📣 رویدادهای اجتماعی</h3></div><div id="publicEvents"></div></div>
+</section>
+
+<section class="page" id="election">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">محبوبیت رئیس‌جمهور</div><div class="stat-value gold-text" id="electionPopularity">۶۵٪</div></div>
+  <div class="card stat"><div class="stat-label">زمان تا انتخابات</div><div class="stat-value" id="electionTime">۴۸ ماه</div></div>
+  <div class="card stat"><div class="stat-label">حمایت انتخاباتی</div><div class="stat-value green-text" id="electionSupport">۶۵٪</div></div>
+  <div class="card stat"><div class="stat-label">رقیب اصلی</div><div class="stat-value" style="font-size:17px" id="rivalName">آرمان رضایی</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card">
+   <div class="section-head"><h3>🗳️ رقابت انتخاباتی</h3><span class="badge">انتخابات ریاست‌جمهوری</span></div>
+   <div id="electionChartWrap" class="chart-wrap"><canvas id="electionChart"></canvas></div>
+   <div id="electionStatus" class="muted small">هنوز تا انتخابات زمان باقی است.</div>
+  </div>
+  <div class="card">
+   <div class="section-head"><h3>📢 فعالیت‌های انتخاباتی</h3></div>
+   <div class="list">
+    <div class="list-item"><h4>سفرهای استانی</h4><p>دیدار با مردم و افزایش شناخت عمومی.</p><button class="btn blue" onclick="campaign('travel')">هزینه ۵ میلیارد</button></div>
+    <div class="list-item"><h4>ارائه برنامه انتخاباتی</h4><p>اعلام برنامه‌های اقتصادی و اجتماعی آینده.</p><button class="btn green" onclick="campaign('program')">هزینه ۸ میلیارد</button></div>
+    <div class="list-item"><h4>مناظره انتخاباتی</h4><p>دفاع از عملکرد دولت و پاسخ به رقبا.</p><button class="btn gold" onclick="campaign('debate')">شرکت در مناظره</button></div>
+   </div>
+   <hr><button class="btn red" onclick="holdElection()" id="electionButton" disabled>برگزاری انتخابات</button>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="world">
+ <div class="section-head"><h3>🌍 نقشه تعاملی جهان</h3><span class="badge">برای انتخاب کشور روی نقشه کلیک کن</span></div>
+ <div class="map-layout">
+  <div class="card" style="padding:10px"><div id="map"></div></div>
+  <div class="card country-info"><div class="section-head"><h3>🤝 مرکز دیپلماسی</h3></div><div id="countryPanel"><p class="muted small">یک کشور را انتخاب کن.</p></div></div>
+ </div>
+ <div class="card" style="margin-top:15px"><div class="section-head"><h3>📜 روابط خارجی</h3></div><div id="relationsTable"></div></div>
+</section>
+
+<section class="page" id="economy">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">بودجه</div><div class="stat-value gold-text" id="ecoBudget">۵۰۰</div></div>
+  <div class="card stat"><div class="stat-label">GDP</div><div class="stat-value" id="ecoGDP">۴۵۰</div></div>
+  <div class="card stat"><div class="stat-label">تورم</div><div class="stat-value red-text" id="ecoInflation">۲۵٪</div></div>
+  <div class="card stat"><div class="stat-label">بیکاری</div><div class="stat-value" id="ecoUnemployment">۹٪</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>📊 نمودار اقتصادی</h3></div><div class="chart-wrap"><canvas id="ecoDetailChart"></canvas></div></div>
+  <div class="card">
+   <div class="section-head"><h3>🏦 سیاست‌های اقتصادی</h3></div>
+   <div class="list">
+    <div class="list-item"><h4>اصلاح نظام مالیاتی</h4><p>افزایش درآمد دولت و احتمال نارضایتی کوتاه‌مدت.</p><button class="btn" onclick="economicAction('tax')">هزینه ۱۵ میلیارد</button></div>
+    <div class="list-item"><h4>حمایت از تولید داخلی</h4><p>افزایش تولید و اشتغال.</p><button class="btn green" onclick="economicAction('production')">هزینه ۲۵ میلیارد</button></div>
+    <div class="list-item"><h4>کنترل تورم</h4><p>کاهش تدریجی تورم.</p><button class="btn blue" onclick="economicAction('inflation')">هزینه ۲۰ میلیارد</button></div>
+    <div class="list-item"><h4>توسعه صادرات</h4><p>تقویت تجارت خارجی.</p><button class="btn gold" onclick="economicAction('export')">هزینه ۱۸ میلیارد</button></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="military">
+ <div class="grid stats">
+  <div class="card stat"><div class="stat-label">قدرت دفاعی</div><div class="stat-value" id="milPower">۶۸</div></div>
+  <div class="card stat"><div class="stat-label">نیروی انسانی</div><div class="stat-value">۵۵۰ هزار</div></div>
+  <div class="card stat"><div class="stat-label">بودجه نظامی</div><div class="stat-value gold-text" id="milBudget">۴۵</div></div>
+  <div class="card stat"><div class="stat-label">آمادگی دفاعی</div><div class="stat-value green-text" id="readiness">۷۲٪</div></div>
+ </div>
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>🛡️ شاخه‌های نیروهای مسلح</h3></div><div id="forces"></div></div>
+  <div class="card"><div class="section-head"><h3>⚙️ مدیریت نظامی</h3></div>
+   <div class="list">
+    <div class="list-item"><h4>افزایش آمادگی دفاعی</h4><p>تقویت آموزش و آمادگی نیروها.</p><button class="btn green" onclick="milAction('readiness')">هزینه ۸ میلیارد</button></div>
+    <div class="list-item"><h4>نوسازی تجهیزات</h4><p>بهبود تجهیزات و زیرساخت دفاعی.</p><button class="btn" onclick="milAction('equipment')">هزینه ۱۵ میلیارد</button></div>
+    <div class="list-item"><h4>افزایش بودجه دفاعی</h4><p>اختصاص منابع بیشتر به نیروهای مسلح.</p><button class="btn gold" onclick="milAction('budget')">هزینه ۲۰ میلیارد</button></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="page" id="projects">
+ <div class="row" style="margin-bottom:15px"><div><h3 style="margin:0">🏗️ پروژه‌های ملی</h3><small class="muted">ساخت آینده کشور</small></div><button class="btn gold" onclick="addProject()">＋ پروژه جدید</button></div>
+ <div class="grid three-col" id="projectList"></div>
+</section>
+
+<section class="page" id="news">
+ <div class="card"><div class="section-head"><h3>📰 خبرگزاری ملی</h3><span class="badge">اخبار داخلی و خارجی</span></div><div id="allNews"></div></div>
+</section>
+
+<section class="page" id="save">
+ <div class="grid two-col">
+  <div class="card"><div class="section-head"><h3>💾 ذخیره بازی</h3></div><p class="muted small">وضعیت کشور، کابینه، مجلس و روابط خارجی ذخیره می‌شود.</p><button class="btn green" onclick="saveGame()">ذخیره بازی</button> <button class="btn blue" onclick="loadGame()">بارگذاری ذخیره</button><hr><div id="saveStatus" class="muted small">وضعیت ذخیره مشخص نیست.</div></div>
+  <div class="card"><div class="section-head"><h3>⚠️ مدیریت کشور</h3></div><p class="muted small">شروع بازی جدید تمام پیشرفت فعلی را پاک می‌کند.</p><button class="btn red" onclick="newGame()">شروع بازی جدید</button><hr><h4>IRAN PRESIDENT 5.3</h4><p class="muted small">Government Update · Royal Purple</p></div>
+ </div>
+</section>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('fa-IR');
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+function initialState(){
+ return {
+ month:1,year:1405,term:0,budget:500,gdp:450,approval:65,inflation:25,
+ unemployment:9,stability:70,military:68,militaryBudget:45,readiness:72,
+ trust:60,protest:0,termLength:48,passedBills:0,
+ history:[450,452,451,455,458,460],
+ news:['دولت جدید برنامه توسعه اقتصادی را آغاز کرد.','نخستین نشست هیئت دولت برگزار شد.','برنامه‌های توسعه کشور در دستور کار قرار گرفت.'],
+ relations:{'عراق':45,'ترکیه':35,'چین':65,'روسیه':50,'آمریکا':-25,'عربستان':10,'پاکستان':40,'هند':45,'فرانسه':-10,'آلمان':15},
+ wars:[],
+ projects:[
+ {name:'راه‌آهن سراسری',cost:50,progress:25,kind:'زیرساخت'},
+ {name:'نیروگاه خورشیدی',cost:35,progress:10,kind:'انرژی'},
+ {name:'دانشگاه ملی فناوری',cost:25,progress:45,kind:'آموزش'}],
+ forces:{army:70,air:62,navy:65,missile:75},
+ cabinet:[
+ {role:'economy',title:'وزیر اقتصاد',name:'محمد رضایی',skill:78},
+ {role:'foreign',title:'وزیر امور خارجه',name:'علی نادری',skill:82},
+ {role:'defense',title:'وزیر دفاع',name:'حسین کریمی',skill:75},
+ {role:'interior',title:'وزیر کشور',name:'رضا احمدی',skill:70},
+ {role:'education',title:'وزیر آموزش',name:'مهدی صالحی',skill:80}],
+ parties:[
+ {name:'ائتلاف توسعه',seats:105,color:'#9472df'},
+ {name:'جبهه اصلاحات',seats:85,color:'#4dc99a'},
+ {name:'ائتلاف ملی',seats:65,color:'#e6c66f'},
+ {name:'مستقل‌ها',seats:35,color:'#67a9ee'}],
+ bills:[],rival:'آرمان رضایی',rivalSupport:35,electionHeld:false
+ };
+}
+let S=initialState(),selectedCountry=null,map=null,chart1=null,chart2=null,chartElection=null;
+const pageNames={dashboard:'داشبورد ریاست جمهوری',government:'دولت و کابینه',parliament:'مجلس و قوانین',public:'مردم و اعتراضات',election:'انتخابات ریاست‌جمهوری',world:'نقشه جهان و دیپلماسی',economy:'اقتصاد و بودجه',military:'نیروهای مسلح',projects:'پروژه‌های ملی',news:'اخبار کشور',save:'ذخیره و مدیریت بازی'};
+function toast(msg){let el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600)}
+function toggleMenu(){$('sidebar').classList.toggle('open');$('overlay').classList.toggle('show')}
+function showPage(p){
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+ $(p).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+ $('pageTitle').textContent=pageNames[p];
+ $('sidebar').classList.remove('open');$('overlay').classList.remove('show');
+ if(p==='world')setTimeout(()=>{initMap();map&&map.invalidateSize()},150);
+ if(p==='election')setTimeout(drawElection,100);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function spend(cost){if(S.budget<cost){toast('بودجه کافی نیست!');return false}S.budget-=cost;return true}
+function addNews(t){S.news.unshift(t);S.news=S.news.slice(0,40)}
+function normalize(){
+ S.approval=clamp(S.approval,0,100);S.stability=clamp(S.stability,0,100);S.trust=clamp(S.trust,0,100);
+ S.protest=clamp(S.protest,0,100);S.readiness=clamp(S.readiness,0,100);S.military=clamp(S.military,0,100);
+ S.inflation=clamp(S.inflation,0,100);S.unemployment=clamp(S.unemployment,0,100);
+ S.rivalSupport=clamp(S.rivalSupport,5,90);S.budget=Math.max(0,S.budget);S.gdp=Math.max(1,S.gdp);
+ S.parties.forEach(p=>p.seats=Math.max(0,Math.round(p.seats)));
+}
+function cabinetAverage(){return S.cabinet.length?S.cabinet.reduce((a,m)=>a+m.skill,0)/S.cabinet.length:0}
+function cabinetSupport(){return clamp(cabinetAverage()*.55+S.approval*.25+S.stability*.2,0,100)}
+function governmentSeats(){return S.parties[0].seats+Math.round(S.parties[1].seats*.25)}
+function update(){
+ normalize();
+ $('dateText').textContent=months[S.month-1]+' '+fmt(S.year);
+ $('budgetStat').textContent=fmt(S.budget);$('gdpStat').textContent=fmt(S.gdp);
+ $('approvalStat').textContent=fmt(S.approval)+'٪';$('militaryStat').textContent=fmt(S.military);
+ $('ecoBudget').textContent=fmt(S.budget);$('ecoGDP').textContent=fmt(S.gdp);
+ $('ecoInflation').textContent=fmt(S.inflation)+'٪';$('ecoUnemployment').textContent=fmt(S.unemployment)+'٪';
+ $('milPower').textContent=fmt(S.military);$('milBudget').textContent=fmt(S.militaryBudget);$('readiness').textContent=fmt(S.readiness)+'٪';
+ $('stabilityText').textContent=fmt(S.stability)+'٪';$('stabilityBar').style.width=S.stability+'%';
+ $('termText').textContent=fmt(S.termLength-S.term)+' ماه';
+ $('cabinetCount').textContent=fmt(S.cabinet.length);
+ $('cabinetAverage').textContent=fmt(cabinetAverage())+'٪';$('cabinetSupport').textContent=fmt(cabinetSupport())+'٪';
+ $('termStat').textContent='ماه '+fmt(S.term);
+ $('supportSeats').textContent=fmt(governmentSeats());
+ $('oppositionSeats').textContent=fmt(290-governmentSeats());
+ $('passedBills').textContent=fmt(S.passedBills);
+ $('publicApproval').textContent=fmt(S.approval)+'٪';$('trustStat').textContent=fmt(S.trust)+'٪';
+ $('dissatisfaction').textContent=fmt(100-S.approval)+'٪';
+ $('protestLevel').textContent=S.protest<25?'کم':S.protest<55?'متوسط':S.protest<80?'زیاد':'بحرانی';
+ $('electionPopularity').textContent=fmt(S.approval)+'٪';
+ $('electionTime').textContent=fmt(Math.max(0,S.termLength-S.term))+' ماه';
+ $('electionSupport').textContent=fmt(electionScore())+'٪';$('rivalName').textContent=S.rival;
+ $('electionButton').disabled=S.term<S.termLength;
+ $('indicators').innerHTML=[['ثبات سیاسی',S.stability,'#9472df'],['رضایت عمومی',S.approval,'#4dc99a'],['آمادگی دفاعی',S.readiness,'#e6c66f'],['اشتغال',100-S.unemployment,'#67a9ee']].map(x=>`<div style="margin:16px 0"><div class="row small"><span>${x[0]}</span><b>${fmt(x[1])}٪</b></div><div class="progress"><i style="width:${x[1]}%;background:${x[2]}"></i></div></div>`).join('');
+ $('publicIndicators').innerHTML=[['اعتماد عمومی',S.trust],['رضایت عمومی',S.approval],['ثبات اجتماعی',S.stability],['نارضایتی',100-S.approval]].map(x=>`<div style="margin:16px 0"><div class="row small"><span>${x[0]}</span><b>${fmt(x[1])}٪</b></div><div class="progress"><i style="width:${x[1]}%"></i></div></div>`).join('');
+ renderNews();renderCabinet();renderParliament();renderPublicEvents();renderProjects();renderForces();renderRelations();renderBills();updateCharts();drawElection();
+}
+function updateCharts(){
+ const config={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#c7bfd5',font:{family:'Vazirmatn'}}}},scales:{x:{ticks:{color:'#aaa2bd'},grid:{color:'#393147'}},y:{ticks:{color:'#aaa2bd'},grid:{color:'#393147'}}}};
+ if(chart1)chart1.destroy();
+ chart1=new Chart($('economyChart'),{type:'line',data:{labels:S.history.map((_,i)=>'ماه '+(i+1)),datasets:[{label:'GDP',data:S.history,borderColor:'#e6c66f',backgroundColor:'#e6c66f22',fill:true,tension:.35}]},options:config});
+ if(chart2)chart2.destroy();
+ chart2=new Chart($('ecoDetailChart'),{type:'bar',data:{labels:['بودجه','GDP','بودجه نظامی'],datasets:[{label:'میلیارد دلار',data:[S.budget,S.gdp,S.militaryBudget],backgroundColor:['#9472df','#e6c66f','#4dc99a'],borderRadius:7}]},options:config});
+}
+function drawElection(){
+ if(!$('electionChart'))return;
+ if(chartElection)chartElection.destroy();
+ chartElection=new Chart($('electionChart'),{type:'doughnut',data:{labels:['رئیس‌جمهور فعلی','رقیب اصلی','سایر'],datasets:[{data:[electionScore(),S.rivalSupport,Math.max(0,100-electionScore()-S.rivalSupport)],backgroundColor:['#e6c66f','#9472df','#4dc99a'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#c7bfd5',font:{family:'Vazirmatn'}}}}}});
+ $('electionStatus').textContent=S.term>=S.termLength?'زمان برگزاری انتخابات فرا رسیده است.':'تا انتخابات '+fmt(S.termLength-S.term)+' ماه باقی مانده است.';
+}
+function renderNews(){
+ $('dashboardNews').innerHTML=S.news.slice(0,5).map(n=>`<div class="news-item">${n}</div>`).join('');
+ $('allNews').innerHTML=S.news.map((n,i)=>`<div class="news-item"><span class="muted">${fmt(i+1)}.</span> ${n}</div>`).join('');
+}
+function renderCabinet(){
+ $('cabinetList').innerHTML=S.cabinet.map((m,i)=>`<div class="member"><div class="avatar">👤</div><div class="member-info"><b>${m.name}</b><small>${m.title} · عملکرد ${fmt(m.skill)}٪</small><div class="progress"><i style="width:${m.skill}%"></i></div></div><button class="btn red" onclick="dismissMinister(${i})">عزل</button></div>`).join('');
+}
+function appointMinister(){
+ let role=$('ministerRole').value,name=$('ministerName').value.trim();
+ if(!name){toast('نام وزیر را وارد کن.');return}
+ const titles={economy:'وزیر اقتصاد',foreign:'وزیر امور خارجه',defense:'وزیر دفاع',interior:'وزیر کشور',education:'وزیر آموزش'};
+ let idx=S.cabinet.findIndex(m=>m.role===role);
+ let minister={role,title:titles[role],name:name.slice(0,35),skill:55+Math.floor(Math.random()*41)};
+ if(idx>=0)S.cabinet[idx]=minister;else S.cabinet.push(minister);
+ S.approval+=1;S.trust+=2;
+ addNews(name+' به سمت '+titles[role]+' منصوب شد.');
+ $('ministerName').value='';update();toast('حکم انتصاب صادر شد.');
+}
+function dismissMinister(i){
+ let m=S.cabinet[i];if(!confirm('آیا از عزل '+m.name+' مطمئنی؟'))return;
+ S.cabinet.splice(i,1);S.approval-=1;S.trust-=2;
+ addNews(m.name+' از سمت '+m.title+' برکنار شد.');update();toast('وزیر برکنار شد.');
+}
+function renderParliament(){
+ $('partyList').innerHTML=S.parties.map(p=>`<div style="margin:17px 0"><div class="row small"><b>${p.name}</b><span>${fmt(p.seats)} کرسی</span></div><div class="party-bar"><i style="width:${p.seats/290*100}%;background:${p.color}"></i></div></div>`).join('');
+}
+function renderBills(){
+ $('billHistory').innerHTML=S.bills.length?S.bills.map(b=>`<div class="vote-box"><div class="row"><b>${b.name}</b><span class="badge">${b.passed?'تصویب شد':'رد شد'}</span></div><div class="vote-result">موافق: ${fmt(b.yes)} · مخالف: ${fmt(b.no)} · ممتنع: ${fmt(b.abstain)}</div></div>`).join(''):'<p class="muted small">هنوز لایحه‌ای ارائه نشده است.</p>';
+}
+function submitBill(){
+ let type=$('billType').value,name=$('billName').value.trim()||'لایحه جدید دولت';
+ let support=governmentSeats()/290;
+ let bonus=(S.approval-50)/250+(cabinetSupport()-50)/300;
+ let chance=clamp(support+bonus,0.05,.95);
+ let yes=Math.round(290*chance),no=Math.round(290*(1-chance));
+ let passed=yes>145;
+ if(type==='tax'&&passed){S.budget+=15;S.approval-=2}
+ if(type==='economy'&&passed){S.gdp+=5;S.unemployment-=.5}
+ if(type==='education'&&passed){S.approval+=4;S.trust+=3}
+ if(type==='security'&&passed){S.stability+=3;S.trust-=1}
+ if(type==='welfare'&&passed){S.approval+=5;S.budget-=12}
+ if(passed)S.passedBills++;
+ S.bills.unshift({name,passed,yes,no,abstain:0});
+ addNews('مجلس درباره «'+name+'» رأی‌گیری کرد؛ لایحه '+(passed?'تصویب شد.':'رد شد.'));
+ $('billName').value='';update();toast(passed?'لایحه تصویب شد!':'لایحه در مجلس رد شد.');
+}
+function renderPublicEvents(){
+ $('publicEvents').innerHTML=S.protest<25?'<div class="news-item">فضای اجتماعی کشور آرام است و اعتراض گسترده‌ای گزارش نشده است.</div>':S.protest<55?'<div class="news-item">گزارش‌هایی از نارضایتی و تجمع‌های محدود در برخی مناطق منتشر شده است.</div>':S.protest<80?'<div class="news-item">نارضایتی عمومی افزایش یافته و دولت با فشار اجتماعی روبه‌رو است.</div>':'<div class="news-item">هشدار: سطح نارضایتی اجتماعی بسیار بالاست. گفت‌وگو و اصلاح سیاست‌ها ضروری است.</div>';
+}
+function publicAction(type){
+ if(type==='dialogue'){S.trust+=7;S.protest-=7;S.approval+=2;addNews('رئیس‌جمهور در گفت‌وگوی عمومی به مطالبات شهروندان پاسخ داد.')}
+ if(type==='welfare'){if(!spend(20))return;S.approval+=6;S.trust+=3;S.protest-=5;addNews('بسته حمایتی جدید برای خانوارها تصویب شد.')}
+ if(type==='services'){if(!spend(15))return;S.approval+=3;S.trust+=4;S.gdp+=1;addNews('برنامه اصلاح خدمات عمومی آغاز شد.')}
+ if(type==='reform'){S.approval+=3;S.trust+=5;S.protest-=8;S.stability+=2;addNews('دولت برنامه اصلاحات اجتماعی و گفت‌وگوی ملی را اعلام کرد.')}
+ update();toast('سیاست اجتماعی اجرا شد.');
+}
+function electionScore(){return clamp(S.approval*.65+S.trust*.2+S.stability*.15,0,100)}
+function campaign(type){
+ if(S.term<S.termLength-6){toast('فعالیت انتخاباتی رسمی هنوز زود است؛ نزدیک انتخابات دوباره تلاش کن.');return}
+ if(type==='travel'){if(!spend(5))return;S.approval+=3;S.trust+=2}
+ if(type==='program'){if(!spend(8))return;S.approval+=4;S.trust+=1}
+ if(type==='debate'){let chance=Math.random();if(chance>.35){S.approval+=5;S.rivalSupport-=3;toast('در مناظره عملکرد خوبی داشتی!')}else{S.approval-=3;S.rivalSupport+=2;toast('رقیب در مناظره امتیاز گرفت.')}}
+ addNews('فعالیت انتخاباتی رئیس‌جمهور انجام شد.');update();
+}
+function holdElection(){
+ if(S.term<S.termLength){toast('هنوز زمان انتخابات نرسیده است.');return}
+ if(!confirm('انتخابات ریاست‌جمهوری برگزار شود؟ نتیجه بر اساس عملکرد دولت محاسبه خواهد شد.'))return;
+ let score=electionScore(),rival=S.rivalSupport+Math.random()*10;
+ if(score+Math.random()*15>rival){
+ S.term=0;S.termLength=48;S.electionHeld=true;S.approval=clamp(S.approval+5,0,100);
+ S.trust=clamp(S.trust+5,0,100);S.rivalSupport=35;
+ addNews('رئیس‌جمهور با پیروزی در انتخابات برای یک دوره دیگر انتخاب شد.');
+ toast('تبریک! در انتخابات پیروز شدی.'); 
+ }else{
+ addNews('رقیب انتخاباتی پیروز شد و دولت جدید تشکیل شد.');
+ toast('در انتخابات شکست خوردی؛ بازی از ابتدا با دولت جدید ادامه پیدا می‌کند.');
+ S.term=0;S.termLength=48;S.approval=45;S.trust=45;S.stability=55;S.rivalSupport=35;
+ S.cabinet=S.cabinet.map(m=>({...m,skill:Math.max(45,m.skill-10)}));
+ }
+ update();
+}
+function quickDecision(type){
+ if(type==='subsidy'&&spend(15)){S.approval+=4;S.stability+=2;S.inflation+=1;addNews('دولت بسته حمایتی جدیدی برای خانوارها تصویب کرد.')}
+ if(type==='education'&&spend(20)){S.approval+=2;S.gdp+=2;S.unemployment-=.3;addNews('بودجه آموزش و دانشگاه‌ها افزایش یافت.')}
+ if(type==='industry'&&spend(25)){S.gdp+=4;S.unemployment-=.6;addNews('بسته حمایتی صنعت و تولید داخلی تصویب شد.')}
+ if(type==='security'&&spend(18)){S.stability+=5;S.approval-=1;addNews('برنامه جدید ارتقای امنیت ملی اجرا شد.')}
+ update();toast('تصمیم دولت اجرا شد.');
+}
+function economicAction(type){
+ const a={tax:[15,()=>{S.budget+=25;S.approval-=3;S.stability-=1},'اصلاح نظام مالیاتی اجرا شد.'],production:[25,()=>{S.gdp+=5;S.unemployment-=1;S.approval+=2},'سرمایه‌گذاری در تولید داخلی آغاز شد.'],inflation:[20,()=>{S.inflation-=4;S.approval+=1},'سیاست کنترل تورم به اجرا درآمد.'],export:[18,()=>{S.budget+=12;S.gdp+=3},'برنامه توسعه صادرات تصویب شد.']}[type];
+ if(spend(a[0])){a[1]();addNews(a[2]);update();toast('سیاست اقتصادی اجرا شد.')}
+}
+function milAction(type){
+ if(type==='readiness'&&spend(8)){S.readiness+=8;S.military+=1}
+ else if(type==='equipment'&&spend(15)){S.military+=5;S.forces.army+=3;S.forces.air+=2}
+ else if(type==='budget'&&spend(20)){S.militaryBudget+=8;S.readiness+=4}
+ else return;
+ addNews('برنامه جدیدی برای تقویت توان دفاعی کشور اجرا شد.');update();toast('برنامه نظامی اجرا شد.');
+}
+function renderForces(){
+ const names={army:'نیروی زمینی',air:'نیروی هوایی',navy:'نیروی دریایی',missile:'توان موشکی'};
+ $('forces').innerHTML=Object.entries(S.forces).map(([k,v])=>`<div style="margin:17px 0"><div class="row small"><b>${names[k]}</b><span>${fmt(v)} از ۱۰۰</span></div><div class="progress"><i style="width:${v}%"></i></div></div>`).join('');
+}
+function renderProjects(){
+ $('projectList').innerHTML=S.projects.map((p,i)=>`<div class="card"><div class="row"><h4 style="margin:0">${p.name}</h4><span class="tag">${p.kind}</span></div><p class="muted small">هزینه کل: ${fmt(p.cost)} میلیارد دلار</p><div class="row small"><span>پیشرفت</span><b>${fmt(p.progress)}٪</b></div><div class="progress gold"><i style="width:${p.progress}%"></i></div><button class="btn" style="margin-top:13px" onclick="fundProject(${i})">تأمین بودجه · ۱۰ میلیارد</button></div>`).join('');
+}
+function fundProject(i){let p=S.projects[i];if(p.progress>=100){toast('پروژه تکمیل شده است.');return}if(spend(10)){p.progress=clamp(p.progress+20,0,100);if(p.progress===100){S.gdp+=4;S.approval+=2;addNews('پروژه ملی «'+p.name+'» افتتاح شد.')}update();toast('پروژه پیشرفت کرد.')}}
+function addProject(){let name=prompt('نام پروژه ملی را وارد کن:');if(!name)return;let kind=prompt('نوع پروژه','زیرساخت')||'ملی';S.projects.push({name:name.slice(0,45),kind,cost:30,progress:0});update();toast('پروژه ثبت شد.')}
+const countries={'Iran':['ایران','IR',80],'Iraq':['عراق','IQ',45],'Turkey':['ترکیه','TR',35],'China':['چین','CN',65],'Russia':['روسیه','RU',50],'United States':['آمریکا','US',-25],'Saudi Arabia':['عربستان','SA',10],'Pakistan':['پاکستان','PK',40],'India':['هند','IN',45],'France':['فرانسه','FR',-10],'Germany':['آلمان','DE',15],'United Kingdom':['بریتانیا','GB',-5],'Afghanistan':['افغانستان','AF',30],'Azerbaijan':['آذربایجان','AZ',25],'Armenia':['ارمنستان','AM',35],'Japan':['ژاپن','JP',20],'Brazil':['برزیل','BR',25],'Egypt':['مصر','EG',15],'Israel':['اسرائیل','IL',-80],'Ukraine':['اوکراین','UA',-10],'Qatar':['قطر','QA',35],'United Arab Emirates':['امارات','AE',25]};
+function countryName(n){return countries[n]?.[0]||n}
+function getRelation(n){return S.relations[countryName(n)]??countries[n]?.[2]??20}
+function initMap(){
+ if(map)return;if(!window.L){$('map').innerHTML='برای نمایش نقشه به اینترنت نیاز داری.';return}
+ map=L.map('map',{worldCopyJump:true}).setView([28,35],2);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:8}).addTo(map);
+ fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson').then(r=>r.json()).then(data=>{
+ L.geoJSON(data,{style:{color:'#82739f',weight:.7,fillColor:'#51416f',fillOpacity:.48},onEachFeature:(f,l)=>{
+ let name=f.properties.ADMIN||f.properties.name;l.bindTooltip(countryName(name));
+ l.on('click',()=>selectCountry(name));l.on('mouseover',()=>l.setStyle({fillColor:'#d2b35d',fillOpacity:.75}));
+ l.on('mouseout',()=>l.setStyle({fillColor:'#51416f',fillOpacity:.48}));
+ }}).addTo(map);
+ }).catch(()=>toast('بارگذاری نقشه ناموفق بود.'));
+}
+function selectCountry(name){
+ selectedCountry=countryName(name);let rel=getRelation(name);
+ $('countryPanel').innerHTML=`<h3 class="gold-text">${selectedCountry}</h3><p class="small muted">وضعیت روابط دیپلماتیک</p><div class="stat-value ${rel>=0?'green-text':'red-text'}">${fmt(rel)} از ۱۰۰</div><div class="progress"><i style="width="${clamp((rel+100)/2,0,100)}%"></i></div><div class="action-grid" style="margin-top:17px"><button class="btn" onclick="diplomacy('diplomat')">اعزام دیپلمات</button><button class="btn green" onclick="diplomacy('trade')">پیشنهاد تجارت</button><button class="btn blue" onclick="diplomacy('alliance')">پیشنهاد اتحاد</button><button class="btn gold" onclick="diplomacy('aid')">ارسال کمک</button><button class="btn gray" onclick="diplomacy('sanction')">تحریم اقتصادی</button><button class="btn red" onclick="diplomacy('war')">اعلام جنگ</button><button class="btn green" onclick="diplomacy('peace')">پیشنهاد صلح</button></div>`;
+}
+function diplomacy(type){
+ if(!selectedCountry){toast('ابتدا یک کشور انتخاب کن.');return}
+ let c=selectedCountry,rel=getRelation(c);if(c==='ایران'){toast('نمی‌توانی با خودت مذاکره کنی!');return}
+ if(type==='diplomat'){S.relations[c]=clamp(rel+8,-100,100);addNews('هیئت دیپلماتیک ایران به '+c+' اعزام شد.')}
+ if(type==='trade'){if(!spend(5))return;S.relations[c]=clamp(rel+5,-100,100);S.budget+=9;addNews('توافق تجاری با '+c+' امضا شد.')}
+ if(type==='alliance'){if(rel<35){toast('روابط باید حداقل ۳۵ باشد.');return}S.relations[c]=clamp(rel+8,-100,100);addNews('مذاکرات اتحاد با '+c+' آغاز شد.')}
+ if(type==='aid'){if(!spend(12))return;S.relations[c]=clamp(rel+12,-100,100);addNews('کمک اقتصادی به '+c+' ارسال شد.')}
+ if(type==='sanction'){S.relations[c]=clamp(rel-18,-100,100);S.budget-=3;addNews('تحریم اقتصادی علیه '+c+' اعلام شد.')}
+ if(type==='war'){if(S.wars.includes(c)){toast('در حال جنگ با این کشور هستی.');return}if(!confirm('با '+c+' وارد جنگ شوی؟'))return;S.wars.push(c);S.relations[c]=-100;S.budget-=15;S.stability-=8;addNews('وضعیت جنگی با '+c+' اعلام شد.')}
+ if(type==='peace'){if(!S.wars.includes(c)){toast('با این کشور در جنگ نیستی.');return}S.wars=S.wars.filter(x=>x!==c);S.relations[c]=-35;S.stability+=4;addNews('آتش‌بس با '+c+' برقرار شد.')}
+ update();selectCountry(c);toast('اقدام دیپلماتیک ثبت شد.');
+}
+function renderRelations(){
+ $('relationsTable').innerHTML='<table><thead><tr><th>کشور</th><th>رابطه</th><th>وضعیت</th></tr></thead><tbody>'+Object.entries(S.relations).map(([c,v])=>`<tr><td>${c}</td><td>${fmt(v)}</td><td>${v>=50?'دوستانه':v>=0?'عادی':v>=-40?'تنش‌آلود':'خصمانه'}</td></tr>`).join('')+'</tbody></table>';
+}
+function nextMonth(){
+ S.month++;if(S.month>12){S.month=1;S.year++}
+ S.term++;
+ S.budget+=24+S.gdp*.025-18-S.militaryBudget*.08;
+ S.gdp+=S.gdp*.008-S.inflation*.015;
+ S.inflation=clamp(S.inflation+(Math.random()-.53)*1.5,2,80);
+ S.unemployment=clamp(S.unemployment+(Math.random()-.55)*.3,2,30);
+ let avg=cabinetAverage();
+ S.approval+=((avg-65)/100)+(Math.random()-.5)*2;
+ S.trust+=((avg-65)/120)+(Math.random()-.5)*1.5;
+ S.stability+=(Math.random()-.5)*1.5;
+ S.protest=clamp((100-S.approval)*.75+(100-S.trust)*.25,0,100);
+ S.rivalSupport=clamp(S.rivalSupport+(Math.random()-.48)*1.5,10,85);
+ S.cabinet.forEach(m=>{m.skill=clamp(m.skill+(Math.random()-.48)*2,20,100)});
+ S.projects.forEach(p=>{if(p.progress<100&&S.budget>20&&Math.random()<.4)p.progress=clamp(p.progress+5,0,100)});
+ S.history.push(Math.round(S.gdp));S.history=S.history.slice(-8);
+ if(Math.random()<.5){
+ const events=[
+ ['افزایش صادرات',()=>{S.budget+=12;S.gdp+=2}],
+ ['افزایش قیمت کالاها',()=>{S.inflation+=2;S.approval-=2}],
+ ['رشد سرمایه‌گذاری داخلی',()=>{S.gdp+=3;S.unemployment-=.5}],
+ ['نارضایتی از هزینه‌های زندگی',()=>{S.approval-=4;S.trust-=2}],
+ ['رونق گردشگری',()=>{S.budget+=5;S.approval+=1}],
+ ['موفقیت برنامه‌های آموزشی',()=>{S.approval+=2;S.gdp+=1}],
+ ['اختلاف در کابینه',()=>{S.stability-=3;S.trust-=2}],
+ ['همکاری مجلس با دولت',()=>{S.stability+=2;S.approval+=1}]
+ ];
+ let e=events[Math.floor(Math.random()*events.length)];e[1]();addNews('رویداد ماه: '+e[0]+'.');
+ }
+ S.wars.forEach(c=>{if(Math.random()<.18){S.wars=S.wars.filter(x=>x!==c);S.stability+=2;addNews('آتش‌بس با '+c+' برقرار شد.')}else{S.budget-=8;S.approval-=1}});
+ if(S.protest>75&&Math.random()<.35){S.stability-=5;addNews('افزایش نارضایتی عمومی، دولت را با بحران سیاسی روبه‌رو کرد.')}
+ normalize();update();toast('به '+months[S.month-1]+' '+fmt(S.year)+' وارد شدی.');
+ if(S.term===S.termLength)addNews('دوره ریاست‌جمهوری به پایان رسیده است؛ انتخابات در انتظار برگزاری است.');
+}
+function saveGame(){localStorage.setItem('iranPresident53',JSON.stringify(S));$('saveStatus').textContent='آخرین ذخیره: '+new Date().toLocaleString('fa-IR');toast('بازی ذخیره شد.')}
+function loadGame(){
+ try{
+ let raw=localStorage.getItem('iranPresident53')||localStorage.getItem('iranPresident52')||localStorage.getItem('iranPresident51')||localStorage.getItem('iranPresident5');
+ if(!raw){toast('ذخیره‌ای پیدا نشد.');return}
+ let loaded=JSON.parse(raw);S={...initialState(),...loaded};
+ S.cabinet=S.cabinet||initialState().cabinet;S.parties=S.parties||initialState().parties;S.bills=S.bills||[];S.trust=S.trust??60;S.protest=S.protest??0;S.term=S.term??0;S.rival= S.rival||'آرمان رضایی';
+ update();toast('بازی بارگذاری شد.');
+ }catch(e){toast('خطا در بارگذاری ذخیره.')}
+}
+function newGame(){if(!confirm('تمام پیشرفت فعلی پاک شود؟'))return;S=initialState();update();saveGame();toast('بازی جدید آغاز شد.')}
+update();
+if(localStorage.getItem('iranPresident53'))$('saveStatus').textContent='یک ذخیره از نسخه ۵.۳ پیدا شد.';
+else if(localStorage.getItem('iranPresident52'))$('saveStatus').textContent='ذخیره نسخه ۵.۲ پیدا شد؛ با بارگذاری می‌توانی آن را وارد کنی.';
+</script>
+</body>
+</html>
