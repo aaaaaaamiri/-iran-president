@@ -1,0 +1,20 @@
+
+{
+  "id": "/-iran-president/",
+  "name": "IRAN PRESIDENT 5.3",
+  "short_name": "IRAN PRES",
+  "description": "IRAN PRESIDENT Government Simulation Game",
+  "start_url": "/-iran-president/",
+  "scope": "/-iran-president/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#100b20",
+  "theme_color": "#6c35b5",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
