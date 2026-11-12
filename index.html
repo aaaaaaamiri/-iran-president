@@ -89,7 +89,16 @@ hr{border:0;border-top:1px solid var(--border);margin:15px 0}
 @media(max-width:700px){.sidebar{transform:translateX(105%);transition:.25s;width:260px;box-shadow:-10px 0 30px #0005}.sidebar.open{transform:translateX(0)}.overlay.show{display:block;position:fixed;inset:0;background:#0009;z-index:90}.main{margin:0;width:100%;padding:15px 12px 35px}.menu-toggle{display:block}.topbar{align-items:flex-start}.page-title h1{font-size:19px}.datebox{display:none}.stats{gap:9px}.card{padding:13px}.stat-value{font-size:20px}#map{height:360px}.three-col{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => console.error("SW error:", error));
+  });
+}
+</script>
+ <body>
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 <div class="layout">
 <aside class="sidebar" id="sidebar">
